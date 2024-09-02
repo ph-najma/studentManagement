@@ -1,0 +1,217 @@
+<%-include("header")%>
+<style>
+  /* Style for the form section */
+  #hero {
+    padding: 50px 0;
+    background-color: #f8f9fa; /* Light background color */
+  }
+
+  /* Style for the container */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+
+  /* Style for the button */
+  .btn {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn:hover {
+    background-color: gray; /* Darker shade on hover */
+  }
+
+  /* Style for the table */
+  .table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+
+  .table th,
+  .table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .table th {
+    background-color: black;
+    color: white;
+  }
+
+  .table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  .table tr:hover {
+    background-color: #e9ecef;
+  }
+
+  /* Style for table images */
+  .table img {
+    max-width: 80px;
+    border-radius: 5px;
+  }
+
+  /* Style for the table actions */
+  .table .btn {
+    padding: 5px 10px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 3px;
+  }
+
+  .table .btn:hover {
+    background-color: #c82333;
+  }
+
+  /* General styles for the headings */
+  h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #343a40;
+  }
+
+  /* Style for the form wrapper */
+  .form-wrapper {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+  }
+
+  /* Style for Swal confirmation */
+  .swal2-container .swal2-title {
+    font-family: "Arial", sans-serif;
+    font-weight: bold;
+  }
+
+  .swal2-container .swal2-content {
+    font-family: "Arial", sans-serif;
+  }
+
+  .swal2-container .swal2-styled.swal2-confirm {
+    background-color: #007bff;
+  }
+
+  .swal2-container .swal2-styled.swal2-cancel {
+    background-color: #dc3545;
+  }
+</style>
+<section
+  id="hero"
+  style="
+    background-image: url(../assets/newimages/billboard-bg.png);
+    background-repeat: no-repeat;
+  "
+>
+  <div class="container">
+    <div class="row align-items-center">
+      <div style="padding: 100px">
+        <a href="/addStudent">
+          <button class="btn mb-3 float-right">Add Student</button>
+        </a>
+        <h3>Student Lists</h3>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">SL</th>
+
+              <th scope="col">Name</th>
+              <th scope="col">Course</th>
+              <th scope="col">DOB</th>
+              <th scope="col">AD No</th>
+              <th scope="col">Gender</th>
+              <th scope="col">Email</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% studentData.forEach((student, index) => { %>
+            <tr>
+              <th scope="row"><%= index + 1 %></th>
+
+              <td><%= student.name %></td>
+              <td><%= student.course %></td>
+              <td><%= new Date(student.dob).toLocaleDateString() %></td>
+              <!-- Convert date to a readable format -->
+              <td><%= student.rollno %></td>
+              <td><%= student.gender %></td>
+              <td><%= student.email %></td>
+              <td><%= student.phone %></td>
+              <td>
+                <a href="/editStudent?_id=<%= student._id %>">Edit</a>
+                <button
+                  class="btn"
+                  onclick="confirmDelete('<%= student._id %>')"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  function confirmDelete(studentId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/deleteStudent?_id=${studentId}`, {
+          method: "POST",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire(
+                "Deleted!",
+                "Student has been deleted.",
+                "success"
+              ).then(() => {
+                window.location.href = "/studentList";
+              });
+            } else {
+              Swal.fire(
+                "Error!",
+                "There was an error deleting the student.",
+                "error"
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire(
+              "Error!",
+              "There was an error deleting the student.",
+              "error"
+            );
+          });
+      }
+    });
+  }
+</script>
+
+<%-include("footer")%>
